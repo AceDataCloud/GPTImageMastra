@@ -4,11 +4,17 @@
 
 [English](../README.md) · [获取应用 API Key](https://platform.acedata.cloud/console/applications?utm_source=github&utm_medium=referral&utm_campaign=evergreen&utm_content=gptimagemastra_readme_api_key) · [当前服务权限与价格](https://platform.acedata.cloud/models?utm_source=github&utm_medium=referral&utm_campaign=evergreen&utm_content=gptimagemastra_readme_pricing)
 
-## 1. 安装当前候选包
+## 1. 安装版本化集成包
 
-2026-10-18 状态：源码候选，npm 发布待完成；Mastra 已关闭这项官方集成指南提案，当前不推进该官方入口，独立 ToolProvider 安装仍是可用接入机制。包名为 `@acedatacloud/mastra-gpt-image`，实现正式的 ToolProvider 接口。安装包后还要注册到项目，才能在 Studio 选择工具。
+这是独立社区集成 **0.1.0**，版本化安装包位于 [GitHub Release](https://github.com/AceDataCloud/GPTImageMastra/releases/tag/v0.1.0)，包名为 `@acedatacloud/mastra-gpt-image`。npm 登记是独立分发渠道；Mastra 官方指南提案已关闭，本包没有官方目录条目。
 
-需要 Node 22.13+；先按[英文版安装命令](../README.md#1-install-this-integration)克隆 `codex/native-tool-provider` 分支，运行 `npm ci`、`npm run check`、`npm pack`，再在自己的 Mastra 项目安装生成的 tgz 与 `@mastra/editor@0.16.0`。不要把尚未发布的 npm 名称当成已可一键安装。
+需要 Node 22.13+，在现有 Mastra 项目安装：
+
+```bash
+npm install https://github.com/AceDataCloud/GPTImageMastra/releases/download/v0.1.0/acedatacloud-mastra-gpt-image-0.1.0.tgz @mastra/editor@0.16.0
+```
+
+发布包包含编译后的 JavaScript 和类型声明。手动下载时可按发布页 `SHA256SUMS.txt` 校验；随后按下文注册到服务器，才能在项目的 Studio 里选择工具。
 
 ## 2. 注册并获取应用密钥
 
@@ -46,7 +52,7 @@ const editor = new MastraEditor({ toolProviders: { gptimage } });
 
 生成会产生费用，需要用户先检查当前价格后自己执行：调用一次 `openai_generate_image`，例如 prompt 为 `A watercolor illustration of a quiet coastline at sunrise`；模型以当前工具 schema 为准。
 
-保存返回的 `task_id`，按服务提示的间隔调用 `openai_get_task` 查询**同一个 ID**。pending/running 和预览都不等于完成；不要重跑生成来查进度。查询明确完成且 `response.success: true` 后再展示最终媒体链接，失败则停止。生成响应丢失时先检查任务记录，再决定是否重新提交。
+保存返回的 `task_id`，按服务提示的间隔调用 `openai_get_task` 查询**同一个 ID**：把提交返回的 `task_id` 填进查询工具的 `id` 参数。pending/running 和预览都不等于完成；不要重跑生成来查进度。查询明确完成且 `response.success: true` 后再展示最终媒体链接，失败则停止。生成响应丢失时先检查任务记录，再决定是否重新提交。
 
 适配器不自动重试调用，也不改模型或价格。Agent/工作流上层仍可能再次调用，需同时关闭生成重试。MCP/JSON 错误和明确任务失败会抛出 `AceToolError`，只保留实际返回的安全状态码/代码/请求 ID，不把原始诊断复制进日志。
 
