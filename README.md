@@ -6,19 +6,15 @@ Use **GPT Image image generation and image editing, and task queries** in Mastra
 
 ## 1. Install this integration
 
-**Status, 2026-10-18:** source candidate; npm release is pending. Mastra closed the proposed official integration-guide request for now; this is an independent ToolProvider, with no official listing. The npm name is `@acedatacloud/mastra-gpt-image`. This package implements Mastra's documented [ToolProvider interface](https://mastra.ai/reference/editor/tool-provider); installing it does not add a global Marketplace entry or an LLM provider.
+**Version 0.1.0** is an independent community ToolProvider. Use the versioned package from [GitHub Releases](https://github.com/AceDataCloud/GPTImageMastra/releases/tag/v0.1.0). The package name is `@acedatacloud/mastra-gpt-image`; npm registry publication is a separate distribution channel. Mastra closed the proposed official integration-guide request for now, so this package has no official Mastra directory listing.
 
-To review/install the current candidate with Node 22.13 or newer:
+With Node 22.13 or newer, install the release in your existing Mastra project:
 
 ```bash
-git clone --branch codex/native-tool-provider https://github.com/AceDataCloud/GPTImageMastra.git
-cd GPTImageMastra
-npm ci
-npm run check
-npm pack
-# In your existing Mastra project:
-npm install /absolute/path/to/GPTImageMastra/acedatacloud-mastra-gpt-image-0.1.0.tgz @mastra/editor@0.16.0
+npm install https://github.com/AceDataCloud/GPTImageMastra/releases/download/v0.1.0/acedatacloud-mastra-gpt-image-0.1.0.tgz @mastra/editor@0.16.0
 ```
+
+The release includes compiled JavaScript and TypeScript declarations. Compare its SHA256 with `SHA256SUMS.txt` on the release page if you download it first. Then register the provider as shown below. [Mastra documents the ToolProvider interface](https://mastra.ai/reference/editor/tool-provider); installing a package alone does not register it with your project.
 
 Tested with `@mastra/core@1.75.0`, `@mastra/editor@0.16.0`, and MCP SDK `1.32.1`. The package uses MCP directly so a dropped response does not automatically resubmit a paid generation. Your Mastra agent/workflow can still submit another call: disable generation retries there too.
 
@@ -81,7 +77,7 @@ The following generation is a **user action that can incur charges**, not an ins
 
 1. After reviewing current pricing, call `openai_generate_image` once with a short prompt, such as `A watercolor illustration of a quiet coastline at sunrise`. Choose a model supported by the live tool schema; this package does not substitute models or set prices.
 2. Save the returned `task_id`. A submitted task or intermediate preview is not a completed result.
-3. Call `openai_get_task` with **that same ID**, respecting the server's polling guidance. Never rerun generation to check progress. A lost generation response needs investigation before resubmission.
+3. Call `openai_get_task` with **that same ID in its `id` input** (the submission field is named `task_id`), respecting the server's polling guidance. Never rerun generation to check progress. A lost generation response needs investigation before resubmission.
 4. Continue only while the task is pending/running. Stop on a terminal success or failure. Present final media URLs only after the query reports completion and `response.success: true` (or equivalent explicit completion guidance).
 
 The adapter preserves the MCP content envelope and async hints. JSON/MCP errors and explicit failed tasks reject with `AceToolError`. Safe `statusCode`, `code`, and `requestId` are retained only when actually supplied; raw upstream messages are not copied into error logs. Error metadata omitted by a server cannot be reconstructed.
@@ -110,4 +106,4 @@ To use an existing local MCP installation instead of the hosted endpoint, pass a
 
 ## Official discovery and contribution
 
-Mastra supports registered ToolProviders, user-configured MCP connections, and a separate managed Connect catalog. This candidate uses the first mechanism. It has **not** been admitted to Mastra Connect or the official integration directory. The [official integration-guide request](https://github.com/mastra-ai/mastra/issues/27373) was closed by a maintainer on 2026-10-18 (Asia/Shanghai), stating that this is not being pursued now. Independent ToolProvider installation remains the supported path; this package has no official directory admission. See the [maintainer decision](https://github.com/mastra-ai/mastra/issues/27373#issuecomment-6239261501). See the concrete proposal in [the contribution material](readme/mastra-submission.md). LLM dropdown discovery is a separate [models.dev contribution](https://github.com/anomalyco/models.dev/pull/8873), not a feature of this package.
+Mastra supports registered ToolProviders, user-configured MCP connections, and a separate managed Connect catalog. This integration uses the first mechanism. It has **not** been admitted to Mastra Connect or the official integration directory. The [official integration-guide request](https://github.com/mastra-ai/mastra/issues/27373) was closed by a maintainer on 2026-10-18 (Asia/Shanghai), stating that this is not being pursued now. Independent ToolProvider installation remains the supported path; this package has no official directory admission. See the [maintainer decision](https://github.com/mastra-ai/mastra/issues/27373#issuecomment-6239261501). See the concrete proposal in [the contribution material](readme/mastra-submission.md). LLM dropdown discovery is a separate [models.dev contribution](https://github.com/anomalyco/models.dev/pull/8873), not a feature of this package.
